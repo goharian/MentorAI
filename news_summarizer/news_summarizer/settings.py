@@ -128,7 +128,6 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# נשתמש ב-Redis כ-Cache Backend עבור סיכומי המאמרים
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
@@ -146,6 +145,6 @@ CACHES = {
     }
 }
 
-NEWS_API_KEY = 'YOUR_NEWS_API_KEY_HERE'
+NEWS_API_KEY = '6d9e1673c0744188997b2a417e2d1ee3'
 NEWS_API_URL = 'https://newsapi.org/v2/everything'
 NEWS_API_QUERY = 'Technology'
