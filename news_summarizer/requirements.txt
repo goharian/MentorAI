@@ -1,6 +1,6 @@
 Django~=5.0.0
 djangorestframework~=3.15.0
 psycopg2-binary~=2.9.9  # PostgreSQL
-requests~=2.31.0       # News API
-django-redis~=5.4.0    # Caching with Redis
-# TODO: openai~=1.12.0 # Uncomment when integrating OpenAI API
+requests~=2.31.0        # News API
+django-redis~=5.4.0     # Caching with Redis
+openai~=1.12.0
