@@ -5,18 +5,23 @@ from django.shortcuts import get_object_or_404
 from .models import Article
 from .serializers import ArticleListSerializer, ArticleDetailSerializer, ArticleSummarySerializer
 from .chatgpt_service import get_article_summary_with_caching
-
+from .pagination import StandardResultsSetPagination
 
 class ArticleViewSet(viewsets.ReadOnlyModelViewSet):
     """
+    ViewSet for listing and retrieving articles.
+    Endpoints:
     - GET /articles: paginated list.
     - GET /articles/{id}: article details.
     """
     queryset = Article.objects.all()
+    pagination_class = StandardResultsSetPagination
 
     def get_serializer_class(self):
         """
-        return List Serializer for a list and Detail Serializer for a single article
+        Determine the serializer class based on the action.
+        Returns:
+            Serializer class based on action.
         """
         if self.action == 'list':
             return ArticleListSerializer
@@ -25,10 +30,19 @@ class ArticleViewSet(viewsets.ReadOnlyModelViewSet):
 
 class ArticleSummaryView(APIView):
     """
+    View for retrieving article summaries.
     Returns the article summary, using Caching and the ChatGPT service.
     Endpoint: GET /articles/{id}/summary
     """
     def get(self, request, pk):
+        """
+        Get the summary for a specific article by its ID.
+        Args:
+            request: The HTTP request object.
+            pk: Primary key of the article.
+        Returns:
+            Response: JSON response containing the article summary.
+        """ 
         article = get_object_or_404(Article, pk=pk)
         summary_text, cached = get_article_summary_with_caching(article.title, article.content)
 
