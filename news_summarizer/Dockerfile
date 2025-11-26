@@ -8,6 +8,9 @@ ENV PYTHONUNBUFFERED 1
 # הגדרת ספריית עבודה
 WORKDIR /usr/src/app
 
+# הוספת ספריית העבודה ל-PYTHONPATH
+ENV PYTHONPATH=/usr/src/app
+
 # התקנת דרישות מערכת (לצורך psycopg2)
 RUN apt-get update && apt-get install -y \
     postgresql-client \

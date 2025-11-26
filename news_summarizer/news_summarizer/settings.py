@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'articles',
     'django_redis',
+    'celery',
+    'django_celery_beat',
 ]
 
 MIDDLEWARE = [
@@ -154,3 +156,14 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 if not OPENAI_API_KEY:
     print("var OPENAI_API_KEY isn't define!")
+
+
+# =========================================================
+# Celery Configuration Options
+# =========================================================
+CELERY_BROKER_URL = 'redis://redis:6379/0'
+CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC'

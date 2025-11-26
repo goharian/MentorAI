@@ -4,15 +4,12 @@ services:
     image: postgres:14-alpine
     container_name: postgres_db
     environment:
-      # פרטי החיבור ל-DB, חייבים להתאים ל-settings.py!
       POSTGRES_DB: mydatabase
       POSTGRES_USER: mydatabaseuser
       POSTGRES_PASSWORD: mypassword
     volumes:
-      # שומר את הנתונים באופן קבוע
       - postgres_data:/var/lib/postgresql/data/
     ports:
-      # ניתן לגשת ל-DB מבחוץ בפורט 5432 (אופציונלי)
       - "5432:5432"
 
   # --- שירות Caching (Redis) ---
@@ -24,23 +21,53 @@ services:
 
   # --- שירות האפליקציה (Django/DRF) ---
   app:
-    build: . # בונה את האימג' לפי ה-Dockerfile הנוכחי
+    build: .
     container_name: django_app
-    command: python manage.py runserver 0.0.0.0:8000 # הפעלת שרת הפיתוח
+    command: python manage.py runserver 0.0.0.0:8000
     volumes:
-      # מחבר את קבצי הפרויקט המקומיים לתוך הקונטיינר לצורך עדכון מיידי
       - .:/usr/src/app
     ports:
-      # פורט 8000 של הקונטיינר נגיש בפורט 8000 המקומי
       - "8000:8000"
     environment:
-      # הגדרות סביבה נוספות, אם נדרש
       NEWS_API_KEY: ${NEWS_API_KEY}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
     depends_on:
-      # מוודא ש-DB ו-Redis פועלים לפני הרצת האפליקציה
       - db
       - redis
+
+  # =========================================================
+  # Celery Worker Service
+  # =========================================================
+  worker:
+      build: . 
+      container_name: celery_worker_1
+      command: python -m celery -A news_summarizer worker -l info
+      volumes:
+        - .:/usr/src/app
+      environment:
+        NEWS_API_KEY: ${NEWS_API_KEY}
+        OPENAI_API_KEY: ${OPENAI_API_KEY}
+      depends_on:
+        - db
+        - redis
+        - app
+
+  # =========================================================
+  # Celery Beat Service
+  # =========================================================
+  beat:
+    build: .
+    container_name: celery_beat
+    command: python -m celery -A news_summarizer beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    volumes:
+      - .:/usr/src/app
+    environment:
+      NEWS_API_KEY: ${NEWS_API_KEY}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+    depends_on:
+      - db
+      - redis
+      - app
 
 volumes:
   postgres_data:

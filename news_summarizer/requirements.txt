@@ -4,3 +4,6 @@ psycopg2-binary~=2.9.9  # PostgreSQL
 requests~=2.31.0        # News API
 django-redis~=5.4.0     # Caching with Redis
 openai~=1.12.0
+celery~=5.3.0
+redis~=4.5.0
+django-celery-beat~=2.6.0
