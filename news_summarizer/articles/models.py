@@ -9,7 +9,7 @@ class Article(models.Model):
     id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=512)
     content = models.TextField(null=True, blank=True)
-    url = models.URLField(max_length=2000)
+    url = models.URLField(unique=True,max_length=2000)
     published_date = models.DateTimeField()
     source = models.CharField(max_length=255)
 
