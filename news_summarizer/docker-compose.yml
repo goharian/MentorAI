@@ -1,5 +1,8 @@
 services:
-  # --- שירות מסד הנתונים PostgreSQL ---
+  
+  # =========================================================
+  # PostgreSQL Service
+  # =========================================================
   db:
     image: postgres:14-alpine
     container_name: postgres_db
@@ -12,14 +15,30 @@ services:
     ports:
       - "5432:5432"
 
-  # --- שירות Caching (Redis) ---
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mydatabaseuser"]
+      interval: 10s       # check every 10 seconds
+      timeout: 5s         # wait maximum 5 seconds for a response
+      retries: 5          # consider unhealthy after 5 failed attempts
+
+  # =========================================================
+  # Redis Caching Service
+  # =========================================================
   redis:
     image: redis:alpine
     container_name: redis_cache
     ports:
       - "6379:6379"
+    
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s       # check every 5 seconds
+      timeout: 3s         # wait maximum 3 seconds for a response
+      retries: 5          # consider unhealthy after 5 failed attempts
 
-  # --- שירות האפליקציה (Django/DRF) ---
+  # =========================================================
+  # Django Application Service
+  # =========================================================
   app:
     build: .
     container_name: django_app
@@ -32,8 +51,10 @@ services:
       NEWS_API_KEY: ${NEWS_API_KEY}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   # =========================================================
   # Celery Worker Service
@@ -48,9 +69,10 @@ services:
         NEWS_API_KEY: ${NEWS_API_KEY}
         OPENAI_API_KEY: ${OPENAI_API_KEY}
       depends_on:
-        - db
-        - redis
-        - app
+        db:
+          condition: service_healthy
+        redis:
+          condition: service_healthy
 
   # =========================================================
   # Celery Beat Service
@@ -65,9 +87,10 @@ services:
       NEWS_API_KEY: ${NEWS_API_KEY}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
     depends_on:
-      - db
-      - redis
-      - app
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
 volumes:
   postgres_data:
