@@ -1,3 +1,6 @@
+"""
+ChatGPT-based article summarization service.
+"""
 from django.conf import settings
 from django.core.cache import caches
 import logging
@@ -9,6 +12,13 @@ SUMMARY_CACHE = caches['summaries']
 
 
 def summarize_article_with_chatgpt(title: str, content: str) -> str:
+    """
+    Returns a summary of the article using ChatGPT.
+
+    :param title: The title of the article.
+    :param content: The content of the article.
+    :return: A summary string.
+    """
     try:
         from openai import OpenAI, APIError 
         from openai._base_client import SyncHttpxClientWrapper
@@ -37,7 +47,8 @@ def summarize_article_with_chatgpt(title: str, content: str) -> str:
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": f"Title: {title}\n\nContent:\n{content}"}
             ],
-            temperature=0.3
+            temperature=0.3,
+            timeout=30
         )
 
         return response.output_text
@@ -52,6 +63,12 @@ def summarize_article_with_chatgpt(title: str, content: str) -> str:
 
 
 def get_article_summary_with_caching(title: str, content: str):
+    """
+    Get article summary with caching.
+    :param title: The title of the article.
+    :param content: The content of the article.
+    :return: A tuple of (summary string, from_cache boolean).
+    """
     cache_key = f"summary:{title[:50]}"
 
     cached = SUMMARY_CACHE.get(cache_key)
