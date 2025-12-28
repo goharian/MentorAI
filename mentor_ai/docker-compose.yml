@@ -4,19 +4,18 @@ services:
   # PostgreSQL Service
   # =========================================================
   db:
-    image: postgres:14-alpine
+    image: pgvector/pgvector:pg14
     container_name: postgres_db
     environment:
-      POSTGRES_DB: mydatabase
-      POSTGRES_USER: mydatabaseuser
-      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: mentor_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     ports:
       - "5432:5432"
-
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U mydatabaseuser"]
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s       # check every 10 seconds
       timeout: 5s         # wait maximum 5 seconds for a response
       retries: 5          # consider unhealthy after 5 failed attempts
@@ -62,7 +61,7 @@ services:
   worker:
       build: . 
       container_name: celery_worker_1
-      command: python -m celery -A news_summarizer worker -l info
+      command: python -m celery -A mentor_ai worker -l info
       volumes:
         - .:/usr/src/app
       environment:
@@ -80,7 +79,7 @@ services:
   beat:
     build: .
     container_name: celery_beat
-    command: python -m celery -A news_summarizer beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    command: python -m celery -A mentor_ai beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
     volumes:
       - .:/usr/src/app
     environment:

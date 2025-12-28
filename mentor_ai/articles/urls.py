@@ -1,12 +1,9 @@
-from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import ArticleViewSet, ArticleSummaryView
+from .views import MentorViewSet, VideoContentViewSet, ContentChunkViewSet
 
 router = DefaultRouter()
-router.register(r'articles', ArticleViewSet, basename='article')
+router.register(r"mentors", MentorViewSet)
+router.register(r"videos", VideoContentViewSet)
+router.register(r"chunks", ContentChunkViewSet)
 
-urlpatterns = [
-    path('', include(router.urls)),
-    
-    path('articles/<int:pk>/summary', ArticleSummaryView.as_view(), name='article-summary'),
-]
+urlpatterns = router.urls

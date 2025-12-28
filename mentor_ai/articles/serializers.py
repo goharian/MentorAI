@@ -1,27 +1,25 @@
+"""
+Serializers for the Mentor AI application models.
+"""
 from rest_framework import serializers
-from .models import Article
+from .models import Mentor, VideoContent, ContentChunk
 
-class ArticleListSerializer(serializers.ModelSerializer):
-    """
-    Serializer to display a list of articles (basic data).
-    """
+
+class MentorSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Article
-        fields = ('id', 'title', 'url', 'published_date', 'source')
+        model = Mentor
+        fields = ["id", "name", "slug", "created_at", "updated_at"]
 
 
-class ArticleDetailSerializer(serializers.ModelSerializer):
-    """
-    Serializer to display single article details (including full content).
-    # """
+class VideoContentSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Article
-        fields = ('id', 'title', 'content', 'url', 'published_date', 'source')
+        model = VideoContent
+        fields = [
+            "id", "mentor", "title", "youtube_video_id", "created_at", "updated_at",
+        ]
 
 
-class ArticleSummarySerializer(serializers.Serializer):
-    """
-    Serializer to display article summary.
-    """
-    summary = serializers.CharField()
-    cached = serializers.BooleanField()
+class ContentChunkSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContentChunk
+        fields = ["id", "video", "chunk_index", "text", "created_at"]
