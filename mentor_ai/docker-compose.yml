@@ -1,7 +1,7 @@
 services:
   
   # =========================================================
-  # PostgreSQL Service
+  # PostgreSQL Service with pgvector
   # =========================================================
   db:
     image: pgvector/pgvector:pg14
@@ -12,6 +12,7 @@ services:
       POSTGRES_PASSWORD: postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data/
+      - ./init-pgvector.sql:/docker-entrypoint-initdb.d/init-pgvector.sql
     ports:
       - "5432:5432"
     healthcheck:
@@ -49,6 +50,10 @@ services:
     environment:
       NEWS_API_KEY: ${NEWS_API_KEY}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
+      CHUNK_SIZE_WORDS: 350
+      CHUNK_OVERLAP_WORDS: 50
+      EMBEDDING_MODEL: text-embedding-3-small
+      EMBEDDING_DIMENSIONS: 1536
     depends_on:
       db:
         condition: service_healthy
@@ -67,6 +72,10 @@ services:
       environment:
         NEWS_API_KEY: ${NEWS_API_KEY}
         OPENAI_API_KEY: ${OPENAI_API_KEY}
+        CHUNK_SIZE_WORDS: 350
+        CHUNK_OVERLAP_WORDS: 50
+        EMBEDDING_MODEL: text-embedding-3-small
+        EMBEDDING_DIMENSIONS: 1536
       depends_on:
         db:
           condition: service_healthy

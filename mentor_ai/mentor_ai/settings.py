@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django_redis',
     'celery',
     'django_celery_beat',
+    'pgvector',
 ]
 
 MIDDLEWARE = [
@@ -165,6 +166,10 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 if not OPENAI_API_KEY:
     print("var OPENAI_API_KEY isn't define!")
 
+CHUNK_SIZE_WORDS = int(os.getenv('CHUNK_SIZE_WORDS', 350))
+CHUNK_OVERLAP_WORDS = int(os.getenv('CHUNK_OVERLAP_WORDS', 50))
+EMBEDDING_MODEL = os.getenv('EMBEDDING_MODEL', 'text-embedding-3-small')
+EMBEDDING_DIMENSIONS = int(os.getenv('EMBEDDING_DIMENSIONS', 1536))
 
 # =========================================================
 # Celery Configuration Options
