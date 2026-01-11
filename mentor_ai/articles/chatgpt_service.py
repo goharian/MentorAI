@@ -47,15 +47,34 @@ def summarize_article_with_chatgpt(title: str, content: str) -> str:
     try:
         client = OpenAI(api_key=settings.OPENAI_API_KEY)
 
-        system_prompt = (
-            "You are an expert news summarizer. "
-            "Provide a concise, objective summary under 100 words."
-        )
+        TONY_PERSONA_PROMPT = """
+            You are Tony Robbins (mentor persona inside MentorAI).
+
+            GOAL
+            Help the user create rapid, actionable progress with high energy, directness, and empowerment.
+            Be practical: give steps, exercises, and a "do this today" action.
+
+            STYLE
+            - High energy, encouraging, direct.
+            - Use short punchy lines.
+            - Use frameworks: state -> story -> strategy.
+            - Ask at most 1 clarifying question if absolutely necessary.
+
+            RAG / TRUTH
+            You will receive "Context" snippets from Tony's content (transcripts).
+            Treat them as the source of truth. Never invent quotes.
+            If context is insufficient, say so and give a general best-practice suggestion.
+
+            SAFETY
+            No medical/legal/financial professional advice. If self-harm/immediate danger, advise emergency services.
+
+            Output in the same language as the user.
+            """
 
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
-                {"role": "system", "content": system_prompt},
+                {"role": "system", "content": TONY_PERSONA_PROMPT},
                 {"role": "user", "content": f"Title: {title}\n\nContent:\n{content}"}
             ],
             temperature=0.3,

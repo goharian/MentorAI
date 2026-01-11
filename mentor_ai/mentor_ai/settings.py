@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'celery',
     'django_celery_beat',
     'pgvector',
+    'mentors'
 ]
 
 MIDDLEWARE = [
