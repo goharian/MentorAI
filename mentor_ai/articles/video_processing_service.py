@@ -4,6 +4,7 @@ from typing import Dict, List
 from articles.chunking_service import TranscriptChunker
 from articles.embedding_service import EmbeddingService
 from articles.models import ContentChunk, VideoContent
+from .youtube_transcript import get_transcript, get_video_id
 
 
 class VideoProcessingService:
