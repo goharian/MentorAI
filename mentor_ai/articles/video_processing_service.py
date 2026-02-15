@@ -4,7 +4,7 @@ from typing import Dict, List
 from articles.chunking_service import TranscriptChunker
 from articles.embedding_service import EmbeddingService
 from articles.models import ContentChunk, VideoContent
-from .youtube_transcript import get_transcript, get_video_id
+from .youtube_transcript import get_transcript
 
 
 class VideoProcessingService:
@@ -25,6 +25,9 @@ class VideoProcessingService:
     ) -> dict:
         
         try:
+            # Re-processing should replace previous chunks rather than failing on unique constraints.
+            video.chunks.all().delete()
+
             # Chunking
             video.status = VideoContent.Status.CHUNKED
             video.save()
@@ -52,6 +55,30 @@ class VideoProcessingService:
             video.status = VideoContent.Status.FAILED
             video.save()
             raise Exception(f"Video processing failed: {str(e)}")
+
+    def process_video_from_youtube(self, video: VideoContent) -> dict:
+        """
+        Fetch transcript from YouTube and process the video end-to-end.
+        """
+        transcript_result = get_transcript(video.youtube_video_id)
+        if not transcript_result.get("success"):
+            raise ValueError(
+                f"Transcript fetch failed for video {video.youtube_video_id}: "
+                f"{transcript_result.get('error', 'Unknown error')}"
+            )
+
+        video.status = VideoContent.Status.FETCHED
+        video.save(update_fields=["status", "updated_at"])
+
+        transcript_entries = transcript_result.get("entries", [])
+        if not transcript_entries:
+            raise ValueError("Transcript is empty")
+
+        result = self.process_video_with_transcript(video, transcript_entries)
+        return {
+            **result,
+            "transcript_entries": transcript_result.get("entries_count", 0),
+        }
         
     @transaction.atomic
     def _create_chunks_with_embeddings(self, video: VideoContent, chunks_data: List):

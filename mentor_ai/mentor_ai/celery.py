@@ -1,9 +1,9 @@
 import os
 from celery import Celery
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'news_summarizer.settings') 
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mentor_ai.settings')
 
-app = Celery('news_summarizer')
+app = Celery('mentor_ai')
 
 app.config_from_object('django.conf:settings', namespace='CELERY')
 

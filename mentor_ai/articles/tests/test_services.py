@@ -1,49 +1,93 @@
-from django.test import TestCase, override_settings
 from unittest import mock
-from django.utils import timezone
-from ..models import Article
-from ..services import fetch_and_store_articles
-import requests
 
-class ServicesTests(TestCase):
-	"""
-	Tests for article services.
-	"""
+from django.test import TestCase
 
-	@mock.patch('articles.services.process_and_save_article_task')
-	@mock.patch('articles.services.requests.get')
-	def test_fetch_and_store_articles_sends_to_celery_task(self, mock_requests_get, mock_celery_task):
-		"""
-		Test that fetch_and_store_articles fetches articles and sends them to Celery task.
-		"""
+from articles.chunking_service import ChunkData
+from articles.models import ContentChunk, Mentor, VideoContent
+from articles.video_processing_service import VideoProcessingService
 
-		fake_article = {
-			'url': 'https://example.com/new-1',
-			'title': 'New Article',
-			'content': 'Content here',
-			'publishedAt': '2020-01-01T12:00:00Z',
-			'source': {'name': 'Example'}
-		}
 
-		fake_response = mock.Mock()
-		fake_response.raise_for_status = mock.Mock()
-		fake_response.json.return_value = {'articles': [fake_article, fake_article]}
-		mock_requests_get.return_value = fake_response
+class VideoProcessingServiceTests(TestCase):
+    def setUp(self):
+        self.embedding_service_patcher = mock.patch("articles.video_processing_service.EmbeddingService")
+        self.embedding_service_patcher.start()
+        self.mentor = Mentor.objects.create(
+            name="Test Mentor",
+            slug="test-mentor",
+        )
+        self.video = VideoContent.objects.create(
+            mentor=self.mentor,
+            title="A long enough title",
+            youtube_video_id="dQw4w9WgXcQ",
+        )
 
-		with override_settings(NEWS_API_URL='https://api.test', NEWS_API_KEY='key', NEWS_API_QUERY='q'):
-			saved = fetch_and_store_articles()
+    def tearDown(self):
+        self.embedding_service_patcher.stop()
 
-		self.assertEqual(saved, 2)
-		mock_celery_task.delay.assert_called()
-		self.assertEqual(mock_celery_task.delay.call_count, 2)
+    @mock.patch("articles.video_processing_service.get_transcript")
+    def test_process_video_from_youtube_raises_on_fetch_error(self, mock_get_transcript):
+        mock_get_transcript.return_value = {
+            "success": False,
+            "error": "Transcript disabled",
+        }
+        service = VideoProcessingService()
 
-	def test_fetch_and_store_articles_handles_request_exception(self):
-		"""
-		Test that fetch_and_store_articles handles RequestException gracefully.
-		"""
+        with self.assertRaises(ValueError):
+            service.process_video_from_youtube(self.video)
 
-		with override_settings(NEWS_API_URL='https://api.test', NEWS_API_KEY='key', NEWS_API_QUERY='q'):
-			with mock.patch('articles.services.requests.get', side_effect=requests.exceptions.RequestException("fail")):
-				result = fetch_and_store_articles()
+        self.video.refresh_from_db()
+        self.assertEqual(self.video.status, VideoContent.Status.NEW)
 
-		self.assertEqual(result, 0)
+    @mock.patch("articles.video_processing_service.get_transcript")
+    def test_process_video_from_youtube_calls_process_with_entries(self, mock_get_transcript):
+        mock_get_transcript.return_value = {
+            "success": True,
+            "entries_count": 2,
+            "entries": [
+                {"text": "hello", "start": 0.0, "duration": 1.0},
+                {"text": "world", "start": 1.0, "duration": 1.0},
+            ],
+        }
+        service = VideoProcessingService()
+        service.process_video_with_transcript = mock.Mock(
+            return_value={"success": True, "chunks_created": 1, "total_duration": 2.0}
+        )
+
+        result = service.process_video_from_youtube(self.video)
+
+        self.video.refresh_from_db()
+        self.assertEqual(self.video.status, VideoContent.Status.FETCHED)
+        self.assertEqual(result["transcript_entries"], 2)
+        service.process_video_with_transcript.assert_called_once()
+
+    def test_process_video_with_transcript_replaces_old_chunks(self):
+        ContentChunk.objects.create(
+            video=self.video,
+            chunk_index=0,
+            text="old chunk",
+        )
+        service = VideoProcessingService()
+        service.chunker = mock.Mock(
+            chunk_transcript=mock.Mock(
+                return_value=[
+                    ChunkData(
+                        text="new chunk",
+                        chunk_index=0,
+                        start_seconds=0.0,
+                        end_seconds=2.0,
+                        word_count=2,
+                    )
+                ]
+            )
+        )
+        service._create_chunks_with_embeddings = mock.Mock()
+
+        result = service.process_video_with_transcript(
+            self.video,
+            [{"text": "new chunk", "start": 0.0, "duration": 2.0}],
+        )
+
+        self.video.refresh_from_db()
+        self.assertEqual(self.video.status, VideoContent.Status.READY)
+        self.assertEqual(result["chunks_created"], 1)
+        self.assertEqual(ContentChunk.objects.filter(video=self.video).count(), 0)

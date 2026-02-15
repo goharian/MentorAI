@@ -41,6 +41,7 @@ class VideoContent(models.Model):
 
     class Status(models.TextChoices):
         NEW = "new", "New"
+        QUEUED = "queued", "Queued"
         FETCHED = "fetched", "Transcript fetched"
         CHUNKED = "chunked", "Chunked"
         EMBEDDED = "embedded", "Embedded"

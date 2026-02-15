@@ -1,35 +1,50 @@
+from django.db import IntegrityError, transaction
 from django.test import TestCase
-from articles.models import Article
 
-class ArticleModelTest(TestCase):
-    """
-    Tests for the Article model.
-    """
+from articles.models import ContentChunk, Mentor, VideoContent
 
-    def test_article_creation(self):
-        """
-        Test that an Article instance can be created successfully.
-        """
-        article = Article.objects.create(
-            title="Test Article",
-            content="This is a test article content.",
-            url="https://example.com/test-article",
-            published_date="2023-01-01T12:00:00Z",
-            source="Example Source"
+
+class ModelsTests(TestCase):
+    def setUp(self):
+        self.mentor = Mentor.objects.create(
+            name="Naval Ravikant",
+            slug="naval-ravikant",
         )
-        self.assertIsInstance(article, Article)
-        self.assertEqual(Article.objects.count(), 1)
-        self.assertEqual(article.title, "Test Article")
 
-    def test_article_str_representation(self):
-        """
-        Test the string representation of the Article model.
-        """
-        article = Article.objects.create(
-            title="Another Test Article",
-            content="Content for another test article.",
-            url="https://example.com/another-test-article",
-            published_date="2023-01-02T12:00:00Z",
-            source="Another Source"
+    def test_mentor_str_returns_name(self):
+        self.assertEqual(str(self.mentor), "Naval Ravikant")
+
+    def test_video_content_unique_per_mentor_and_youtube_id(self):
+        VideoContent.objects.create(
+            mentor=self.mentor,
+            title="How to Build Products",
+            youtube_video_id="dQw4w9WgXcQ",
         )
-        self.assertEqual(str(article), "Another Test Article")
+
+        with self.assertRaises(IntegrityError):
+            with transaction.atomic():
+                VideoContent.objects.create(
+                    mentor=self.mentor,
+                    title="Duplicate Video",
+                    youtube_video_id="dQw4w9WgXcQ",
+                )
+
+    def test_content_chunk_unique_chunk_index_per_video(self):
+        video = VideoContent.objects.create(
+            mentor=self.mentor,
+            title="Learning in Public",
+            youtube_video_id="xvFZjo5PgG0",
+        )
+        ContentChunk.objects.create(
+            video=video,
+            chunk_index=0,
+            text="first chunk",
+        )
+
+        with self.assertRaises(IntegrityError):
+            with transaction.atomic():
+                ContentChunk.objects.create(
+                    video=video,
+                    chunk_index=0,
+                    text="duplicate chunk index",
+                )

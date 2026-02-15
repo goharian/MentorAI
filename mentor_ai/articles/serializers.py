@@ -15,8 +15,15 @@ class VideoContentSerializer(serializers.ModelSerializer):
     class Meta:
         model = VideoContent
         fields = [
-            "id", "mentor", "title", "youtube_video_id", "created_at", "updated_at",
+            "id",
+            "mentor",
+            "title",
+            "youtube_video_id",
+            "status",
+            "created_at",
+            "updated_at",
         ]
+        read_only_fields = ["status", "created_at", "updated_at"]
 
 
 class ContentChunkSerializer(serializers.ModelSerializer):

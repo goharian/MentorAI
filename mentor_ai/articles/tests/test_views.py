@@ -1,36 +1,53 @@
-from unittest import mock
 from django.urls import reverse
-from django.test import TestCase, Client
-from articles.models import Article
+from rest_framework import status
+from rest_framework.test import APITestCase
 
-class ArticleViewsTest(TestCase):
-    """
-    Tests for article-related views.
-    """
-    def test_article_summary_view_returns_summary_and_cached_flag(self):
-        """
-        Test that the article summary view returns the summary and cached flag.
-        """
-        from django.utils import timezone
+from articles.models import ContentChunk, Mentor, VideoContent
 
-        # Create an article in the test database
-        article = Article.objects.create(
-            title="View Test",
-            content="Some content for the view test",
-            url="https://example.com/article",
-            published_date=timezone.now(),
-            source="Example"
+
+class ArticlesApiViewsTests(APITestCase):
+    def setUp(self):
+        self.mentor = Mentor.objects.create(
+            name="Naval Ravikant",
+            slug="naval-ravikant",
+        )
+        self.video = VideoContent.objects.create(
+            mentor=self.mentor,
+            title="How to get rich without getting lucky",
+            youtube_video_id="dQw4w9WgXcQ",
+        )
+        self.chunk = ContentChunk.objects.create(
+            video=self.video,
+            chunk_index=0,
+            text="Some chunk text",
         )
 
-        # Patch the function imported in the views module
-        with mock.patch(
-            "articles.views.get_article_summary_with_caching",
-            return_value=("View summary", True)
-        ):
-            client = self.client
-            resp = client.get(f"/articles/{article.pk}/summary")
+    def test_video_list_returns_status_field(self):
+        response = self.client.get(reverse("videocontent-list"), format="json")
 
-        self.assertEqual(resp.status_code, 200)
-        data = resp.json()
-        self.assertEqual(data.get("summary"), "View summary")
-        self.assertTrue(data.get("cached"))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["count"], 1)
+        self.assertEqual(response.data["results"][0]["status"], VideoContent.Status.NEW)
+
+    def test_video_create_ignores_status_from_client(self):
+        response = self.client.post(
+            reverse("videocontent-list"),
+            {
+                "mentor": str(self.mentor.id),
+                "title": "A valid title",
+                "youtube_video_id": "xvFZjo5PgG0",
+                "status": VideoContent.Status.READY,
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        created = VideoContent.objects.get(id=response.data["id"])
+        self.assertEqual(created.status, VideoContent.Status.NEW)
+
+    def test_chunk_list_returns_video_relation(self):
+        response = self.client.get(reverse("contentchunk-list"), format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["count"], 1)
+        self.assertEqual(str(response.data["results"][0]["video"]), str(self.video.id))
