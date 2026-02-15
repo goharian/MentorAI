@@ -7,7 +7,7 @@ from django.contrib.postgres.operations import CreateExtension
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('articles', '0004_contentchunk_mentor_videocontent_delete_article_and_more'),
+        ('articles', '0003_alter_article_url'),
     ]
 
     operations = [

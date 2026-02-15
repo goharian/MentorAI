@@ -10,7 +10,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('articles', '0003_alter_article_url'),
+        ('articles', '0005_install_pgvector'),
     ]
 
     operations = [
