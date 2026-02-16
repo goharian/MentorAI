@@ -1,4 +1,5 @@
 import logging
+import time
 from celery import shared_task
 from django.apps import apps
 from django.utils import timezone
@@ -55,6 +56,14 @@ def process_video_transcript_task(self, video_id: str):
     """
     Pull transcript + process chunks/embeddings in a Celery worker.
     """
+    start_time = time.perf_counter()
+    logger.info(
+        "Video transcript processing started | task_id=%s video_id=%s retries=%s",
+        self.request.id,
+        video_id,
+        self.request.retries,
+    )
+
     try:
         video = VideoContent.objects.select_related("mentor").get(id=video_id)
     except VideoContent.DoesNotExist as exc:
@@ -68,9 +77,23 @@ def process_video_transcript_task(self, video_id: str):
     try:
         service = VideoProcessingService()
         result = service.process_video_from_youtube(video)
-        logger.info("Video transcript processing completed: %s", video_id)
+        duration = time.perf_counter() - start_time
+        logger.info(
+            "Video transcript processing completed | task_id=%s video_id=%s duration_sec=%.2f chunks_created=%s transcript_entries=%s",
+            self.request.id,
+            video_id,
+            duration,
+            result.get("chunks_created"),
+            result.get("transcript_entries"),
+        )
         return {"video_id": video_id, "status": video.status, **result}
     except Exception as exc:
         VideoContent.objects.filter(id=video_id).update(status=VideoContent.Status.FAILED)
-        logger.exception("Video transcript processing failed: %s", video_id)
-        raise exc
+        duration = time.perf_counter() - start_time
+        logger.exception(
+            "Video transcript processing failed | task_id=%s video_id=%s duration_sec=%.2f",
+            self.request.id,
+            video_id,
+            duration,
+        )
+        raise

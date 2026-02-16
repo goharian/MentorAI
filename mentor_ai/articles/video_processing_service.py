@@ -1,3 +1,5 @@
+import logging
+import time
 from django.db import transaction
 from typing import Dict, List
 
@@ -5,6 +7,8 @@ from articles.chunking_service import TranscriptChunker
 from articles.embedding_service import EmbeddingService
 from articles.models import ContentChunk, VideoContent
 from .youtube_transcript import get_transcript
+
+logger = logging.getLogger(__name__)
 
 
 class VideoProcessingService:
@@ -23,7 +27,8 @@ class VideoProcessingService:
         video: VideoContent, 
         transcript: List[Dict]
     ) -> dict:
-        
+        total_start = time.perf_counter()
+
         try:
             # Re-processing should replace previous chunks rather than failing on unique constraints.
             video.chunks.all().delete()
@@ -31,19 +36,39 @@ class VideoProcessingService:
             # Chunking
             video.status = VideoContent.Status.CHUNKED
             video.save()
-            
+
+            chunking_start = time.perf_counter()
             chunks_data = self.chunker.chunk_transcript(transcript)
             if not chunks_data:
                 raise ValueError("No chunks were created from the transcript.")
+            logger.info(
+                "Chunking completed | video_id=%s chunks=%s duration_sec=%.2f",
+                video.id,
+                len(chunks_data),
+                time.perf_counter() - chunking_start,
+            )
             
             # Embedding
             video.status = VideoContent.Status.EMBEDDED
             video.save()
+            embedding_start = time.perf_counter()
             self._create_chunks_with_embeddings(video, chunks_data)
+            logger.info(
+                "Embedding completed | video_id=%s chunks=%s duration_sec=%.2f",
+                video.id,
+                len(chunks_data),
+                time.perf_counter() - embedding_start,
+            )
 
             # Finalize
             video.status = VideoContent.Status.READY
             video.save()
+            total_duration = time.perf_counter() - total_start
+            logger.info(
+                "Video processing finished | video_id=%s total_duration_sec=%.2f",
+                video.id,
+                total_duration,
+            )
 
             return {
                 'success': True,
@@ -54,12 +79,14 @@ class VideoProcessingService:
         except Exception as e:
             video.status = VideoContent.Status.FAILED
             video.save()
+            logger.exception("Video processing failed | video_id=%s", video.id)
             raise Exception(f"Video processing failed: {str(e)}")
 
     def process_video_from_youtube(self, video: VideoContent) -> dict:
         """
         Fetch transcript from YouTube and process the video end-to-end.
         """
+        logger.info("Fetching transcript | video_id=%s youtube_video_id=%s", video.id, video.youtube_video_id)
         transcript_result = get_transcript(video.youtube_video_id)
         if not transcript_result.get("success"):
             raise ValueError(
@@ -73,6 +100,11 @@ class VideoProcessingService:
         transcript_entries = transcript_result.get("entries", [])
         if not transcript_entries:
             raise ValueError("Transcript is empty")
+        logger.info(
+            "Transcript fetched | video_id=%s entries=%s",
+            video.id,
+            transcript_result.get("entries_count", 0),
+        )
 
         result = self.process_video_with_transcript(video, transcript_entries)
         return {

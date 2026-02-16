@@ -13,6 +13,13 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 from pathlib import Path
 
+
+def env_float(name, default):
+    try:
+        return float(os.getenv(name, str(default)))
+    except (TypeError, ValueError):
+        return float(default)
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -186,3 +193,58 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'UTC'
+CELERY_WORKER_HIJACK_ROOT_LOGGER = False
+CELERY_TASK_TRACK_STARTED = True
+
+LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
+CELERY_LOG_LEVEL = os.getenv("CELERY_LOG_LEVEL", LOG_LEVEL).upper()
+CELERY_HEAVY_TASK_THRESHOLD_SECONDS = env_float(
+    "CELERY_HEAVY_TASK_THRESHOLD_SECONDS", 30
+)
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "standard": {
+            "format": "%(asctime)s | %(levelname)s | %(name)s | %(processName)s(%(process)d) | %(message)s",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "standard",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": LOG_LEVEL,
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": LOG_LEVEL,
+            "propagate": False,
+        },
+        "celery": {
+            "handlers": ["console"],
+            "level": CELERY_LOG_LEVEL,
+            "propagate": False,
+        },
+        "celery.app.trace": {
+            "handlers": ["console"],
+            "level": CELERY_LOG_LEVEL,
+            "propagate": False,
+        },
+        "mentor_ai.celery_monitor": {
+            "handlers": ["console"],
+            "level": CELERY_LOG_LEVEL,
+            "propagate": False,
+        },
+        "articles": {
+            "handlers": ["console"],
+            "level": LOG_LEVEL,
+            "propagate": False,
+        },
+    },
+}
