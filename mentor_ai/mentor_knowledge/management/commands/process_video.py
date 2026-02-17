@@ -1,9 +1,9 @@
 from django.core.management.base import BaseCommand
 
-from articles.models import VideoContent
+from mentor_knowledge.models import VideoContent
 import json
 
-from articles.video_processing_service import VideoProcessingService
+from mentor_knowledge.video_processing_service import VideoProcessingService
 
 
 class Command(BaseCommand):
@@ -103,4 +103,5 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING(
                 'You must specify either --video-id or --process-all-new'
             ))
+
 

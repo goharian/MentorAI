@@ -20,7 +20,7 @@ task_started_at = {}
 def _load_heavy_task_names():
     names = os.getenv(
         "CELERY_HEAVY_TASK_NAMES",
-        "articles.tasks.process_video_transcript_task",
+        "mentor_knowledge.tasks.process_video_transcript_task",
     )
     return {name.strip() for name in names.split(",") if name.strip()}
 
@@ -115,3 +115,4 @@ def log_heavy_task_finish(task_id=None, task=None, state=None, **_):
 @app.task(bind=True)
 def debug_task(self):
     logger.debug("Debug task request: %r", self.request)
+

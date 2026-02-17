@@ -2,7 +2,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from articles.models import ContentChunk, Mentor, VideoContent
+from mentor_knowledge.models import ContentChunk, Mentor, VideoContent
 
 
 class ArticlesApiViewsTests(APITestCase):
@@ -51,3 +51,4 @@ class ArticlesApiViewsTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["count"], 1)
         self.assertEqual(str(response.data["results"][0]["video"]), str(self.video.id))
+

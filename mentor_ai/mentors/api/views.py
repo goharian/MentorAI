@@ -25,9 +25,9 @@ class RegisterView(APIView):
         responses={201: AuthResponseSerializer},
     )
     def post(self, request):
-        ser = RegisterSerializer(data=request.data)
-        ser.is_valid(raise_exception=True)
-        user = ser.save()
+        serializer = RegisterSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
 
         refresh = RefreshToken.for_user(user)
 
@@ -57,9 +57,9 @@ class LoginView(APIView):
         responses={200: AuthResponseSerializer},
     )
     def post(self, request):
-        ser = LoginSerializer(data=request.data)
-        ser.is_valid(raise_exception=True)
-        user = ser.validated_data["user"]
+        serializer = LoginSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data["user"]
 
         refresh = RefreshToken.for_user(user)
 
@@ -98,13 +98,13 @@ class MentorChatView(APIView):
         responses={200: MentorChatResponseSerializer},
     )
     def post(self, request, mentor_slug: str):
-        ser = MentorChatSerializer(data=request.data)
-        ser.is_valid(raise_exception=True)
+        serializer = MentorChatSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
         payload = chat_with_mentor(
             mentor_slug=mentor_slug,
-            message=ser.validated_data["message"],
-            top_k=ser.validated_data["top_k"],
+            message=serializer.validated_data["message"],
+            top_k=serializer.validated_data["top_k"],
         )
 
         return Response(

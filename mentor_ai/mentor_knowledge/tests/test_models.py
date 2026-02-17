@@ -1,7 +1,7 @@
 from django.db import IntegrityError, transaction
 from django.test import TestCase
 
-from articles.models import ContentChunk, Mentor, VideoContent
+from mentor_knowledge.models import ContentChunk, Mentor, VideoContent
 
 
 class ModelsTests(TestCase):
@@ -48,3 +48,4 @@ class ModelsTests(TestCase):
                     chunk_index=0,
                     text="duplicate chunk index",
                 )
+

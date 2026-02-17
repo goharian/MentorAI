@@ -1,4 +1,4 @@
-from articles.models import Mentor
+from mentor_knowledge.models import Mentor
 from mentors.openai_client import embed_query, generate_answer
 from mentors.retrieval import retrieve_mentor_chunks
 from mentors.prompts import build_persona_prompt

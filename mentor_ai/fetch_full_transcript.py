@@ -4,7 +4,7 @@ import argparse
 import json
 from pathlib import Path
 
-from articles.youtube_transcript import get_transcript
+from mentor_knowledge.youtube_transcript import get_transcript
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -52,3 +52,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

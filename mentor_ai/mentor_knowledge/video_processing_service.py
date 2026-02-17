@@ -3,9 +3,9 @@ import time
 from django.db import transaction
 from typing import Dict, List
 
-from articles.chunking_service import TranscriptChunker
-from articles.embedding_service import EmbeddingService
-from articles.models import ContentChunk, VideoContent
+from mentor_knowledge.chunking_service import TranscriptChunker
+from mentor_knowledge.embedding_service import EmbeddingService
+from mentor_knowledge.models import ContentChunk, VideoContent
 from .youtube_transcript import get_transcript
 
 logger = logging.getLogger(__name__)
@@ -140,3 +140,4 @@ class VideoProcessingService:
 
         # Bulk create chunks in the database
         ContentChunk.objects.bulk_create(chunks_to_create)
+

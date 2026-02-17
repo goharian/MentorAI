@@ -2,14 +2,14 @@ from unittest import mock
 
 from django.test import TestCase
 
-from articles.chunking_service import ChunkData
-from articles.models import ContentChunk, Mentor, VideoContent
-from articles.video_processing_service import VideoProcessingService
+from mentor_knowledge.chunking_service import ChunkData
+from mentor_knowledge.models import ContentChunk, Mentor, VideoContent
+from mentor_knowledge.video_processing_service import VideoProcessingService
 
 
 class VideoProcessingServiceTests(TestCase):
     def setUp(self):
-        self.embedding_service_patcher = mock.patch("articles.video_processing_service.EmbeddingService")
+        self.embedding_service_patcher = mock.patch("mentor_knowledge.video_processing_service.EmbeddingService")
         self.embedding_service_patcher.start()
         self.mentor = Mentor.objects.create(
             name="Test Mentor",
@@ -24,7 +24,7 @@ class VideoProcessingServiceTests(TestCase):
     def tearDown(self):
         self.embedding_service_patcher.stop()
 
-    @mock.patch("articles.video_processing_service.get_transcript")
+    @mock.patch("mentor_knowledge.video_processing_service.get_transcript")
     def test_process_video_from_youtube_raises_on_fetch_error(self, mock_get_transcript):
         mock_get_transcript.return_value = {
             "success": False,
@@ -38,7 +38,7 @@ class VideoProcessingServiceTests(TestCase):
         self.video.refresh_from_db()
         self.assertEqual(self.video.status, VideoContent.Status.NEW)
 
-    @mock.patch("articles.video_processing_service.get_transcript")
+    @mock.patch("mentor_knowledge.video_processing_service.get_transcript")
     def test_process_video_from_youtube_calls_process_with_entries(self, mock_get_transcript):
         mock_get_transcript.return_value = {
             "success": True,
@@ -91,3 +91,4 @@ class VideoProcessingServiceTests(TestCase):
         self.assertEqual(self.video.status, VideoContent.Status.READY)
         self.assertEqual(result["chunks_created"], 1)
         self.assertEqual(ContentChunk.objects.filter(video=self.video).count(), 0)
+

@@ -2,7 +2,7 @@ from unittest import mock
 
 from django.test import SimpleTestCase
 
-from articles.youtube_transcript import get_short_transcript, get_transcript, get_video_id
+from mentor_knowledge.youtube_transcript import get_short_transcript, get_transcript, get_video_id
 
 
 class YouTubeTranscriptTests(SimpleTestCase):
@@ -17,7 +17,7 @@ class YouTubeTranscriptTests(SimpleTestCase):
     def test_get_video_id_invalid_url(self):
         self.assertIsNone(get_video_id("https://example.com/video"))
 
-    @mock.patch("articles.youtube_transcript._build_client")
+    @mock.patch("mentor_knowledge.youtube_transcript._build_client")
     def test_get_transcript_success(self, mock_build_client):
         mock_client = mock.Mock()
         mock_fetch_result = mock.Mock()
@@ -45,7 +45,7 @@ class YouTubeTranscriptTests(SimpleTestCase):
         self.assertFalse(result["success"])
         self.assertIn("Only 'en'", result["error"])
 
-    @mock.patch("articles.youtube_transcript._build_client")
+    @mock.patch("mentor_knowledge.youtube_transcript._build_client")
     def test_get_short_transcript_truncates(self, mock_build_client):
         mock_client = mock.Mock()
         mock_fetch_result = mock.Mock()
@@ -72,3 +72,4 @@ class YouTubeTranscriptTests(SimpleTestCase):
 
         self.assertFalse(result["success"])
         self.assertIn("max_chars", result["error"])
+

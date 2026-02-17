@@ -1,5 +1,5 @@
 from pgvector.django import CosineDistance
-from articles.models import ContentChunk
+from mentor_knowledge.models import ContentChunk
 
 
 def retrieve_mentor_chunks(*, mentor_slug: str, query_embedding: list[float], k: int = 6):
@@ -25,3 +25,4 @@ def retrieve_mentor_chunks(*, mentor_slug: str, query_embedding: list[float], k:
         .order_by("distance")[:k]
     )
     return list(qs)
+

@@ -1,5 +1,5 @@
 """
-Docstring for mentor_ai.articles.chunking_service
+Docstring for mentor_ai.mentor_knowledge.chunking_service
 """
 
 from typing import List, Dict
