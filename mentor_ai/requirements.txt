@@ -11,3 +11,4 @@ redis~=4.5.0                # Redis client
 django-celery-beat~=2.6.0   # Periodic tasks with Celery
 pgvector ~=0.4.0            # Vector storage in PostgreSQL
 youtube-transcript-api~=1.2.0  # YouTube transcript extraction
+drf-spectacular~=0.27.2        # OpenAPI schema + Swagger UI for DRF

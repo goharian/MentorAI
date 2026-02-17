@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'drf_spectacular',
     'articles',
     'django_redis',
     'celery',
@@ -98,6 +99,7 @@ DATABASES = {
 
 # REST Framework Configuration
 REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -108,6 +110,13 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.JSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer',
     ]
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'MentorAI API',
+    'DESCRIPTION': 'OpenAPI documentation for MentorAI endpoints.',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
 }
 
 

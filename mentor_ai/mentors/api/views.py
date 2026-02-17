@@ -3,14 +3,27 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
+from drf_spectacular.utils import OpenApiParameter, OpenApiTypes, extend_schema
 
-from mentors.api.serializers import LoginSerializer, MentorChatSerializer, RegisterSerializer
+from mentors.api.serializers import (
+    AuthResponseSerializer,
+    LoginSerializer,
+    MentorChatResponseSerializer,
+    MentorChatSerializer,
+    RegisterSerializer,
+)
 from mentors.services.chat_service import chat_with_mentor
 
 
 class RegisterView(APIView):
     permission_classes = [AllowAny]
 
+    @extend_schema(
+        tags=["Auth"],
+        summary="Register a new user",
+        request=RegisterSerializer,
+        responses={201: AuthResponseSerializer},
+    )
     def post(self, request):
         ser = RegisterSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
@@ -37,6 +50,12 @@ class RegisterView(APIView):
 class LoginView(APIView):
     permission_classes = [AllowAny]
 
+    @extend_schema(
+        tags=["Auth"],
+        summary="Login and receive JWT tokens",
+        request=LoginSerializer,
+        responses={200: AuthResponseSerializer},
+    )
     def post(self, request):
         ser = LoginSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
@@ -63,6 +82,21 @@ class LoginView(APIView):
 class MentorChatView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        tags=["Mentors"],
+        summary="Chat with a mentor persona",
+        parameters=[
+            OpenApiParameter(
+                name="mentor_slug",
+                location=OpenApiParameter.PATH,
+                required=True,
+                type=OpenApiTypes.STR,
+                description="Mentor slug (for example: 'elon-musk').",
+            )
+        ],
+        request=MentorChatSerializer,
+        responses={200: MentorChatResponseSerializer},
+    )
     def post(self, request, mentor_slug: str):
         ser = MentorChatSerializer(data=request.data)
         ser.is_valid(raise_exception=True)

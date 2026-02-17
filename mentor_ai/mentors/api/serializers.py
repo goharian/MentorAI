@@ -53,3 +53,39 @@ class LoginSerializer(serializers.Serializer):
             raise serializers.ValidationError("Invalid username or password.")
         attrs["user"] = user
         return attrs
+
+
+class UserSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    username = serializers.CharField()
+    email = serializers.EmailField()
+
+
+class TokenPairSerializer(serializers.Serializer):
+    refresh = serializers.CharField()
+    access = serializers.CharField()
+
+
+class AuthResponseSerializer(serializers.Serializer):
+    user = UserSerializer()
+    tokens = TokenPairSerializer()
+
+
+class RetrievedChunkSerializer(serializers.Serializer):
+    chunk_id = serializers.CharField()
+    distance = serializers.FloatField()
+    video_id = serializers.CharField()
+    video_title = serializers.CharField()
+    youtube_video_id = serializers.CharField()
+    chunk_index = serializers.IntegerField()
+    start_seconds = serializers.FloatField()
+    end_seconds = serializers.FloatField()
+    text = serializers.CharField()
+
+
+class MentorChatResponseSerializer(serializers.Serializer):
+    mentor_slug = serializers.SlugField()
+    answer = serializers.CharField()
+    mentor_name = serializers.CharField()
+    chunks_found = serializers.IntegerField()
+    retrieved = RetrievedChunkSerializer(many=True, required=False)
