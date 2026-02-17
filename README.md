@@ -148,3 +148,69 @@ From `mentor_ai/`:
 cd mentor_ai
 docker compose run --rm app python manage.py test
 ```
+
+## Basic AWS Deployment (EC2 + Docker Compose)
+
+This is the fastest production-like setup for this repo.
+
+### 1. Create an EC2 instance
+
+- Ubuntu 22.04 (or 24.04)
+- Open inbound ports in Security Group:
+  - `22` (SSH) from your IP
+  - `80` (HTTP) from internet
+
+### 2. Install Docker on EC2
+
+```bash
+sudo apt-get update
+sudo apt-get install -y docker.io docker-compose-plugin git
+sudo usermod -aG docker $USER
+newgrp docker
+```
+
+### 3. Pull project and configure env
+
+```bash
+git clone <your-repo-url>
+cd MentorAI/mentor_ai
+cp .env.example .env
+```
+
+Edit `.env` and set at least:
+
+- `SECRET_KEY` (random strong value)
+- `ALLOWED_HOSTS` (EC2 public IP or domain)
+- `CSRF_TRUSTED_ORIGINS` (`http://<EC2_PUBLIC_IP>` or your HTTPS domain)
+- `OPENAI_API_KEY`
+- `DB_PASSWORD` (change from default)
+
+### 4. Start services
+
+```bash
+docker compose -f docker-compose.prod.yml --env-file .env up -d --build
+```
+
+### 5. Verify deployment
+
+```bash
+docker compose -f docker-compose.prod.yml ps
+docker compose -f docker-compose.prod.yml logs -f app
+```
+
+App URL:
+
+- `http://<EC2_PUBLIC_IP>/api/docs/`
+
+Optional admin user:
+
+```bash
+docker compose -f docker-compose.prod.yml exec app python manage.py createsuperuser
+```
+
+### 6. Update on new code
+
+```bash
+git pull
+docker compose -f docker-compose.prod.yml --env-file .env up -d --build
+```
