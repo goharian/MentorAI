@@ -27,7 +27,7 @@ Django + DRF backend for a mentor-persona chat system powered by RAG over YouTub
 - `mentor_ai/mentors/` - auth + chat API (JWT + RAG flow)
 - `mentor_ai/docker-compose.yml` - app + db + redis + worker + beat
 
-## Quick Start (Docker)
+## Run The Project (Docker Required)
 
 From repository root:
 
@@ -51,39 +51,6 @@ Docs:
 - Swagger: `http://127.0.0.1:8000/api/docs/`
 - ReDoc: `http://127.0.0.1:8000/api/redoc/`
 - OpenAPI schema: `http://127.0.0.1:8000/api/schema/`
-
-## Local Development (Without Docker)
-
-1. Create venv and install dependencies:
-
-```powershell
-python -m venv .venv
-& .\.venv\Scripts\Activate.ps1
-pip install -r mentor_ai/requirements.txt
-```
-
-2. Start PostgreSQL (with `pgvector`) and Redis.
-
-3. Set environment variables (example):
-
-```powershell
-$env:DB_NAME = "mentor_db"
-$env:DB_USER = "postgres"
-$env:DB_PASSWORD = "postgres"
-$env:DB_HOST = "localhost"
-$env:DB_PORT = "5432"
-$env:OPENAI_API_KEY = "sk-..."
-```
-
-4. Run migrations and services:
-
-```powershell
-cd mentor_ai
-python manage.py migrate
-python manage.py runserver
-python -m celery -A mentor_ai worker -l info
-python -m celery -A mentor_ai beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
-```
 
 ## Main API Endpoints
 
@@ -163,13 +130,14 @@ Process video manually:
 
 ```powershell
 cd mentor_ai
-python manage.py process_video --video-id <uuid> --from-youtube
+docker compose run --rm app python manage.py process_video --video-id <uuid> --from-youtube
 ```
 
 Or process all `new` videos:
 
 ```powershell
-python manage.py process_video --process-all-new --from-youtube
+cd mentor_ai
+docker compose run --rm app python manage.py process_video --process-all-new --from-youtube
 ```
 
 ## Run Tests
@@ -177,5 +145,6 @@ python manage.py process_video --process-all-new --from-youtube
 From `mentor_ai/`:
 
 ```powershell
-python manage.py test
+cd mentor_ai
+docker compose run --rm app python manage.py test
 ```
