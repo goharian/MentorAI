@@ -8,9 +8,11 @@ from drf_spectacular.views import (
     SpectacularRedocView,
     SpectacularSwaggerView,
 )
+from mentor_knowledge.views import LandingPageView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path("", LandingPageView.as_view(), name="landing-page"),
     path('', include('mentor_knowledge.urls')),
     path("api/", include("mentors.api.urls")),
     path("api/schema/", SpectacularAPIView.as_view(), name="api-schema"),

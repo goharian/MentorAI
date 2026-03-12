@@ -1,3 +1,4 @@
+from django.views.generic import TemplateView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -6,6 +7,10 @@ from rest_framework import status
 from .models import Mentor, VideoContent, ContentChunk
 from .serializers import MentorSerializer, VideoContentSerializer, ContentChunkSerializer
 from .tasks import process_video_transcript_task
+
+
+class LandingPageView(TemplateView):
+    template_name = "mentor_knowledge/landing_page.html"
 
 
 class MentorViewSet(ModelViewSet):

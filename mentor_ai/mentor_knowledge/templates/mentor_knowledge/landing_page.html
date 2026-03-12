@@ -1,0 +1,170 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MentorAI | Transform Inspiration into Action</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'mentor_knowledge/landing_page.css' %}">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container header-inner">
+            <a class="brand" href="/">
+                <span class="brand-logo">Y</span>
+                <span class="brand-name">MentorAI</span>
+            </a>
+            <nav class="nav-links" aria-label="Primary">
+                <a href="#mentors">Mentors</a>
+                <a href="#how-it-works">How it Works</a>
+                <a href="/api/docs/">API Docs</a>
+                <a href="/api/redoc/">ReDoc</a>
+            </nav>
+            <a class="btn btn-primary btn-sm" href="#cta">Start Your Journey</a>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero section">
+            <div class="container hero-grid">
+                <div class="hero-copy">
+                    <p class="pill">The Future Of Personal Growth</p>
+                    <h1>Transform Inspiration <span>into Action</span></h1>
+                    <p class="hero-subtitle">
+                        Chat with AI versions of the world's greatest mentors. Get a personalized
+                        growth plan tailored to your goals.
+                    </p>
+                    <div class="hero-actions">
+                        <a class="btn btn-primary" href="#cta">Start Your Journey</a>
+                        <a class="btn btn-secondary" href="#mentors">Explore Mentors</a>
+                    </div>
+                    <p class="social-proof">Joined by 10,000+ ambitious achievers</p>
+                </div>
+                <div class="hero-demo" aria-hidden="true">
+                    <div class="chat-card">
+                        <p class="session-label">Active Session</p>
+                        <h2>Tony Robbins AI</h2>
+                        <p class="bubble bubble-mentor">
+                            "Setting goals is the first step in turning the invisible into the visible."
+                        </p>
+                        <p class="bubble bubble-user">
+                            How do I stay consistent when I lose motivation?
+                        </p>
+                        <p class="typing">Tony is typing...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="mentors" class="section mentor-section">
+            <div class="container">
+                <div class="section-heading">
+                    <div>
+                        <h2>Choose Your Voice</h2>
+                        <p>Select a mentor aligned with your growth goals.</p>
+                    </div>
+                    <a class="view-all" href="/mentors/">View All Mentors</a>
+                </div>
+                <div class="mentor-grid">
+                    <article class="mentor-card">
+                        <div class="portrait portrait-1" role="img" aria-label="Tony Robbins illustration">
+                            <svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="110" cy="75" r="42"/>
+                                <path d="M44 210c10-42 32-62 66-62s56 20 66 62z"/>
+                            </svg>
+                        </div>
+                        <div class="mentor-copy">
+                            <h3>Tony Robbins</h3>
+                            <p class="tags">Energy, Motivation</p>
+                            <p>Master of peak performance and life strategy.</p>
+                            <a class="btn btn-outline" href="/api/docs/">Select Tony</a>
+                        </div>
+                    </article>
+                    <article class="mentor-card">
+                        <div class="portrait portrait-2" role="img" aria-label="Jordan Peterson illustration">
+                            <svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="110" cy="75" r="42"/>
+                                <path d="M44 210c10-42 32-62 66-62s56 20 66 62z"/>
+                            </svg>
+                        </div>
+                        <div class="mentor-copy">
+                            <h3>Jordan Peterson</h3>
+                            <p class="tags">Responsibility, Meaning</p>
+                            <p>Clinical psychologist focused on structure and growth.</p>
+                            <a class="btn btn-outline" href="/api/docs/">Select Jordan</a>
+                        </div>
+                    </article>
+                    <article class="mentor-card">
+                        <div class="portrait portrait-3" role="img" aria-label="Jay Shetty illustration">
+                            <svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="110" cy="75" r="42"/>
+                                <path d="M44 210c10-42 32-62 66-62s56 20 66 62z"/>
+                            </svg>
+                        </div>
+                        <div class="mentor-copy">
+                            <h3>Jay Shetty</h3>
+                            <p class="tags">Mindfulness, Peace</p>
+                            <p>Guided sessions for clarity, calm, and balanced habits.</p>
+                            <a class="btn btn-outline" href="/api/docs/">Select Jay</a>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section id="how-it-works" class="section steps">
+            <div class="container">
+                <div class="section-heading section-heading-center">
+                    <h2>How it Works</h2>
+                    <p>Your journey from inspiration to tangible results in three clear stages.</p>
+                </div>
+                <ol class="step-grid">
+                    <li class="step-card">
+                        <span class="step-icon">1</span>
+                        <h3>Chat & Diagnose</h3>
+                        <p>Share your goals, blockers, and current routine in a focused conversation.</p>
+                    </li>
+                    <li class="step-card">
+                        <span class="step-icon">2</span>
+                        <h3>Personalized Plan</h3>
+                        <p>Receive practical next steps adapted to your schedule and objectives.</p>
+                    </li>
+                    <li class="step-card">
+                        <span class="step-icon">3</span>
+                        <h3>Actionable Habits</h3>
+                        <p>Get consistent nudges and accountability that keep your momentum alive.</p>
+                    </li>
+                </ol>
+            </div>
+        </section>
+
+        <section id="cta" class="section">
+            <div class="container">
+                <div class="cta-card">
+                    <h2>Ready to meet your mentor?</h2>
+                    <a class="btn btn-primary" href="/api/docs/">Get Started For Free</a>
+                    <p>No credit card required. Start your first session today.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container footer-inner">
+            <a class="brand" href="/">
+                <span class="brand-logo">Y</span>
+                <span class="brand-name">MentorAI</span>
+            </a>
+            <div class="footer-links">
+                <a href="/api/docs/">Documentation</a>
+                <a href="/api/redoc/">ReDoc</a>
+                <a href="/admin/">Admin</a>
+            </div>
+            <p class="copyright">© 2026 MentorAI. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>
