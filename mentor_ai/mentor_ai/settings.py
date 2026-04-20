@@ -40,13 +40,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv(
-    "SECRET_KEY",
-    "django-insecure-wo551+mw20@@2*recza8!mv0n06^ewy4urxad+y3ul*q@hvx!&",
-)
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env_bool("DEBUG", True)
+DEBUG = env_bool("DEBUG", False)
+
+if SECRET_KEY is None and not DEBUG:
+    raise ValueError("SECRET_KEY environment variable is not set!")
 
 ALLOWED_HOSTS = env_list("ALLOWED_HOSTS", "127.0.0.1,localhost")
 CSRF_TRUSTED_ORIGINS = env_list("CSRF_TRUSTED_ORIGINS", "")
@@ -213,8 +213,10 @@ NEWS_API_QUERY = 'Technology'
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
-if not OPENAI_API_KEY:
-    print("var OPENAI_API_KEY isn't define!")
+if OPENAI_API_KEY is None and not DEBUG:
+    raise ValueError("OPENAI_API_KEY environment variable is not set!")
+elif OPENAI_API_KEY is None and DEBUG:
+    print("WARNING: OPENAI_API_KEY missing; OpenAI features will fail in development unless provided")
 
 CHUNK_SIZE_WORDS = int(os.getenv('CHUNK_SIZE_WORDS', 350))
 CHUNK_OVERLAP_WORDS = int(os.getenv('CHUNK_OVERLAP_WORDS', 50))
